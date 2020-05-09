@@ -90,6 +90,6 @@ public class AssertJSandbox {
         assertion.last(Assertions.as(InstanceOfAssertFactories.STRING)).isEqualTo("cccc");
 
         // hasSizeでサイズチェック betweenやGreaterThan系もある
-        assertion.hasSize(2);
+        assertion.hasSize(3);
     }
 }

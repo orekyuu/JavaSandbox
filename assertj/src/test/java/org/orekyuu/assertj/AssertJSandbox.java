@@ -3,6 +3,8 @@ package org.orekyuu.assertj;
 import org.assertj.core.api.*;
 import org.junit.jupiter.api.Test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -119,5 +121,21 @@ public class AssertJSandbox {
         assertion
                 .extractingByKey("string", Assertions.as(InstanceOfAssertFactories.CLASS))
                 .isEqualTo(String.class);
+    }
+
+    @Test
+    void urlAssertion() throws MalformedURLException {
+        AbstractUrlAssert<?> assertion = Assertions.assertThat(new URL("https://twitter.com/orekyuu?param1=a&param2=hoge#fragment"));
+
+        // パスのチェック
+        assertion.hasPath("/orekyuu");
+        // ホスト名チェック
+        assertion.hasHost("twitter.com");
+        // クエリパラメータ
+        assertion.hasParameter("param2", "hoge").hasParameter("param1", "a");
+        // プロトコル
+        assertion.hasProtocol("https");
+        // フラグメントのチェック
+        assertion.hasAnchor("fragment");
     }
 }

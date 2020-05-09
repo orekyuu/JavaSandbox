@@ -1,0 +1,13 @@
+allprojects {
+    apply plugin: 'java'
+    group 'org.orekyuu'
+
+    def defaultEncoding = 'UTF-8'
+    [AbstractCompile, Javadoc].each {
+        tasks.withType(it).each { it.options.encoding = defaultEncoding }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+}

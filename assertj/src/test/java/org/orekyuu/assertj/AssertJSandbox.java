@@ -4,6 +4,7 @@ import org.assertj.core.api.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class AssertJSandbox {
@@ -91,5 +92,32 @@ public class AssertJSandbox {
 
         // hasSizeでサイズチェック betweenやGreaterThan系もある
         assertion.hasSize(3);
+    }
+
+    @Test
+    void mapAssertion() {
+        Map<String, Class<?>> map = Map.of("string", String.class, "int", Integer.class, "boolean", Boolean.class);
+        MapAssert<String, Class<?>> assertion = Assertions.assertThat(map);
+        // 引数のすべてのキーを含むか
+        assertion.containsKeys("string", "boolean");
+        // 引数のすべての値を含むか
+        assertion.containsValues(String.class, Integer.class);
+
+        // key-valueペアの組み合わせを含むか
+        assertion.containsEntry("string", String.class);
+
+        // サイズチェック
+        assertion.hasSize(3);
+
+        // サイズチェックのassertionを作ってからreturnToMapでmapのassertionに戻す
+        assertion
+                .size().isEqualTo(3)
+                .returnToMap().doesNotContainKey("hoge");
+
+        // 特定のキーを使って取り出した値のassertion
+        // 第2引数にInstanceOfAssertFactoryを渡すと型変換できる。
+        assertion
+                .extractingByKey("string", Assertions.as(InstanceOfAssertFactories.CLASS))
+                .isEqualTo(String.class);
     }
 }

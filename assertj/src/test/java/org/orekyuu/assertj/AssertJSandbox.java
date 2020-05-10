@@ -23,12 +23,31 @@ public class AssertJSandbox {
 
     @Test
     void exception() {
-        Assertions.assertThatThrownBy(() -> {
-            throw new RuntimeException("test");
-        })
-                .as("assertThatThrownByで例外を投げるかの検査ができる")
-                .isExactlyInstanceOf(RuntimeException.class)// 完全に型が一致するか
-                .isInstanceOf(RuntimeException.class); // RuntimeExceptionを継承した型であるか
+        AbstractThrowableAssert<?, ? extends Throwable> assertion = Assertions.assertThatThrownBy(() -> {
+            throw new RuntimeException("test", new RuntimeException("aaa"));
+        });
+        // 完全に型が一致するか
+        assertion.isExactlyInstanceOf(RuntimeException.class);
+        // RuntimeExceptionを継承した型であるか
+        assertion.isInstanceOf(RuntimeException.class);
+        // メッセージがtestであるか
+        assertion.hasMessage("test");
+        // メッセージに文字列を含むか
+        assertion.hasMessageContaining("te");
+        // メッセージが特定の文字列で始まる / 終わる
+        assertion.hasMessageStartingWith("tes");
+        assertion.hasMessageEndingWith("st");
+        // メッセージが正規表現にマッチするか
+        assertion.hasMessageMatching("te.t");
+
+        // ネストした例外のメッセージがaaaであるか
+        assertion.getCause().hasMessage("aaa");
+        // 大本の例外のメッセージがaaaであるか
+        assertion.hasRootCauseMessage("aaa");
+        // 大本の例外
+        assertion.getRootCause().isExactlyInstanceOf(RuntimeException.class);
+        // 例外のスタックトレースに与えられた文字列を含むか
+        assertion.hasStackTraceContaining("AssertJSandbox.java");
     }
 
     @Test

@@ -3,8 +3,10 @@ package org.orekyuu.assertj;
 import org.assertj.core.api.*;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -137,5 +139,13 @@ public class AssertJSandbox {
         assertion.hasProtocol("https");
         // フラグメントのチェック
         assertion.hasAnchor("fragment");
+    }
+
+    @Test
+    void inputStreamAssertion() {
+        ByteArrayInputStream stream = new ByteArrayInputStream("test\nline2".getBytes(StandardCharsets.UTF_8));
+        AbstractInputStreamAssert<?, ?> assertion = Assertions.assertThat(stream);
+        // input streamの内容が完全一致するか
+        assertion.hasContent("test\nline2");
     }
 }

@@ -4,10 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Path;
-import javax.validation.Validation;
-import javax.validation.Validator;
+import javax.validation.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
@@ -70,7 +67,7 @@ public class ValidationSample {
     /**
      * https://beanvalidation.org/2.0/spec/#valueextractordefinition-builtinvalueextractors
      */
-    class DefaultExtractorForm {
+    static class DefaultExtractorForm {
         List<@NotEmpty String> stringList;
 
         Map<@NotEmpty String, @Max(100) @Min(0) Integer> map;
@@ -104,5 +101,25 @@ public class ValidationSample {
         return it -> StreamSupport.stream(it.getPropertyPath().spliterator(), false)
                 .map(Path.Node::getName)
                 .anyMatch(fieldName::equals);
+    }
+
+    static class NestedForm {
+        @NotEmpty
+        @Valid
+        List<NumberForm> forms;
+
+        public NestedForm(List<NumberForm> forms) {
+            this.forms = forms;
+        }
+    }
+
+    @Test
+    void nested() {
+        NumberForm numberForm = new NumberForm();
+        numberForm.a = -1;
+        var result = validator.validate(new NestedForm(List.of(numberForm)));
+
+        Assertions.assertThat(result).filteredOn(conditionFactory("a")).first()
+                .extracting(ConstraintViolation::getMessage).isEqualTo("must be greater than or equal to 0");
     }
 }

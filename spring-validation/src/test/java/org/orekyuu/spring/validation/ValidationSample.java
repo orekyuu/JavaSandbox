@@ -5,10 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.validation.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -121,5 +121,70 @@ public class ValidationSample {
 
         Assertions.assertThat(result).filteredOn(conditionFactory("a")).first()
                 .extracting(ConstraintViolation::getMessage).isEqualTo("must be greater than or equal to 0");
+    }
+
+    // see: https://beanvalidation.org/2.0/spec/#builtinconstraints
+    static class Annotations {
+        @NotNull // どの型でもOK
+        String notNull;
+
+        @AssertTrue // trueであるか
+        boolean assertTrue;
+
+        @AssertFalse // falseであるか
+        boolean assertFalse;
+
+        @Min(10) // 与えられた数以上であるか BigDecimal/BigInteger/short/int/byte/long
+        BigInteger min;
+        @Max(100) // 与えられた数以下であるか
+        int max;
+        @Negative // マイナス数値であるか
+        int negative;
+        @NegativeOrZero // 0以下であるか
+        int negativeOrZero;
+        @Positive // プラス数値であるか
+        int positive;
+        @PositiveOrZero // 0以上であるか
+        int positiveOrZero;
+        // 与えられた数以上/以下であるか　MinMaxの型に加えてCharSequence
+        // inclusiveでその数を含むか default: true
+        @DecimalMin("0") @DecimalMax(value = "100", inclusive = false)
+        String decimal;
+        // 整数部(integer)と小数部(fraction)の最大桁数
+        // MinMaxの型に加えてCharSequence
+        @Digits(integer = 3, fraction = 0)
+        String digits;
+
+        // 長さがmin以上max以下であるか
+        // CharSequence/Collection/Map/Array
+        @Size(min = 0, max = 128)
+        String size;
+
+        // 今の時間より昔の値か
+        // 今の時間はClockProviderを使って指定できる
+        @Past
+        LocalDateTime past;
+        // 現在と一致もしくは昔か
+        @PastOrPresent
+        LocalDateTime pastOrPresent;
+        // 未来バージョン
+        @Future @FutureOrPresent
+        LocalDate future;
+
+        // 正規表現に一致するか
+        @Pattern(regexp = "\\d+")
+        String pattern;
+        // 空文字でないこと
+        @NotBlank
+        String notBlank;
+        // メールアドレスとしてvalidな形式か
+        // 正規表現のデフォルトは.*なのでそのまま使うことはなさそう
+        @Email(regexp = ".*@.*")
+        String email;
+        // 空ではないこと
+        // CharSequence/Collection/Map/Array
+        @NotEmpty
+        List<String> notEmpty;
+
     }
 }

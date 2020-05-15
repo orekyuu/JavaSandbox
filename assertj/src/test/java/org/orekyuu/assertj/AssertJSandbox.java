@@ -9,16 +9,73 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class AssertJSandbox {
 
+    static class Pair<K, V> {
+        private K key;
+        private V value;
+
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Pair<?, ?> pair = (Pair<?, ?>) o;
+            return Objects.equals(key, pair.key) &&
+                    Objects.equals(value, pair.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key, value);
+        }
+    }
+
     @Test
-    void isEqual() {
-        Assertions.assertThat("test")
-                .as("テストの説明").describedAs("もしくはdescribedAsでも同じ")
-                .withFailMessage("テストが落ちたときのメッセージ").overridingErrorMessage("もしくはoverridingErrorMessageでも同じ")
-                .isEqualTo("test");
+    void objectAssert() {
+        Assertions.assertThat(new Pair<>("key", "value")).as("テストの説明")
+                .describedAs("もしくはdescribedAsでも同じ")
+                .isEqualTo(new Pair<>("key", "value"));
+        Assertions.assertThat(new Pair<>("key", "value")).withFailMessage("テストが落ちたときのメッセージ")
+                .overridingErrorMessage("もしくはoverridingErrorMessageでも同じ")
+                .isEqualTo(new Pair<>("key", "value"));
+
+        ObjectAssert<Pair<String, String>> assertion = Assertions.assertThat(new Pair<>("key", "value"));
+        // 等しい
+        assertion.isEqualTo(new Pair<>("key", "value"));
+        // 等しくない
+        assertion.isNotEqualTo(new Pair<>("test", "test2"));
+
+        // keyのassertionに変換する(ObjectAssertionになる
+        assertion.extracting(it -> it.key).isEqualTo("key");
+        // 他の型のassertionにしたい場合はInstanceOfAssertFactoriesの定数を使って明示する
+        assertion.extracting(it -> it.key, InstanceOfAssertFactories.STRING).endsWith("ey");
+
+        // assertionのネスト
+        assertion.satisfies(pair -> {
+            Assertions.assertThat(pair.key).isEqualTo("key");
+            Assertions.assertThat(pair.value).isEqualTo("value");
+        });
+
+        // Classが一致するか
+        assertion.isExactlyInstanceOf(Pair.class);
+        // instanceofでtrueになるか
+        assertion.isInstanceOf(Object.class);
+
+        // いずれかと合致するか
+        assertion.isIn(new Pair<>("key", "value"), new Pair<>("key2", "value2"));
+
+        // nullのフィールド(privateも含む)が無いこと
+        assertion.hasNoNullFieldsOrProperties();
+        // 指定されたフィールドを除いてnullがないこと
+        Assertions.assertThat(new Pair<>(null, "value")).hasNoNullFieldsOrPropertiesExcept("key");
     }
 
     @Test

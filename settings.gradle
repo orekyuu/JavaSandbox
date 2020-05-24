@@ -1,3 +1,3 @@
 rootProject.name = 'java-sandbox'
-include 'assertj', 'spring-validation'
+include 'assertj', 'spring-validation', 'elasticsearch'
 

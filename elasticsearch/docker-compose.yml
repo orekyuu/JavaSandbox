@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - ./docker-data/elasticsearch:/usr/share/elasticsearch/data
+  elasticsearch-admin:
+    image: elastichq/elasticsearch-hq:release-v3.5.12
+    ports:
+      - 5000:5000

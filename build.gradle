@@ -1,5 +1,6 @@
 plugins {
     id 'org.springframework.boot' version '2.2.7.RELEASE'
+    id "org.openjfx.javafxplugin" version "0.0.8" apply false
 }
 
 allprojects {
